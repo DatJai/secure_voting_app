@@ -84,6 +84,51 @@ Below is an in-depth walk-through.
   - `logger.py` — wrapper around `LogRepository.add_log()` to centralize logging.
 - **DB initializer**: `.devcontainer/init-db.sql` creates tables (`voters`, `tokens`, `ballots`, `mixnet_proofs`, `logs`).
 
+## Project structure
+
+```
+- .devcontainer/
+- .env
+- .git/
+- README.md
+- requirements.txt
+- streamlit_app.py
+- venv/
+- crypto/
+  - __init__.py
+  - hashing.py
+  - rng.py
+  - rsa.py
+- db/
+  - __init__.py
+  - connection.py
+  - repositories/
+    - __init__.py
+    - ballot_repository.py
+    - log_repository.py
+    - mixnet_repository.py
+    - token_repository.py
+    - voter_repository.py
+- pages/
+  - 01_registration.py
+  - 02_request_token.py
+  - 03_cast_vote.py
+  - 04_mixnet.py
+  - 05_tally.py
+  - 06_logs.py
+- services/
+  - __init__.py
+  - mixnet.py
+  - secure_rsa.py
+  - voter_client.py
+  - voting_authority.py
+- utils/
+  - __init__.py
+  - crypto.py
+  - logger.py
+- tests/
+```
+
 ### Data shapes and DB schema mapping
 
 - **Voter (table `voters`)**:
