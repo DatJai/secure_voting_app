@@ -1,0 +1,185 @@
+📝 REGISTER PAGE ADDED - COMPLETE FLOW
+
+═══════════════════════════════════════════════════════════════════════════════
+
+UPDATED NAVIGATION
+
+Pre-Login (3 pages):
+  Navigate: [Dropdown ▼]
+  ├─ 🏠 Home
+  ├─ 📝 Register            ← NEW!
+  └─ 🔐 Admin Login
+
+Post-Login (8 pages):
+  Navigate: [Dropdown ▼]
+  ├─ 🏠 Home
+  ├─ ✍️ Register Voter     (For admin bulk registration)
+  ├─ 🔑 Request Token
+  ├─ 🗳️ Cast Vote
+  ├─ 🔀 MixNet
+  ├─ 📊 Tally
+  ├─ 📜 Logs
+  └─ 🚪 Logout
+
+═══════════════════════════════════════════════════════════════════════════════
+
+COMPLETE VOTING FLOW
+
+Step 1: VOTER SELF-REGISTRATION (Pre-login)
+─────────────────────────────────────────────
+  1. Click: 📝 Register
+  2. Enter: Full Name, Email
+  3. Click: [Create Account]
+  4. ✓ Display: "Your Voter ID: VOTER-001"
+
+Step 2: ADMIN LOGIN (Separate path)
+────────────────────────────────────
+  1. Click: 🔐 Admin Login
+  2. Enter: Username (admin), Password
+  3. Click: [Login]
+  4. ✓ Logged in as Admin
+
+Step 3: ADMIN ISSUES TOKENS
+────────────────────────────
+  1. Click: 🔑 Request Token
+  2. Select: Self-registered voter (VOTER-001)
+  3. Click: [ISSUE BLIND TOKEN]
+  4. ✓ Token issued
+
+Step 4: VOTING
+──────────────
+  1. Click: 🗳️ Cast Vote
+  2. Select: Voter ID, Candidate
+  3. Click: [CAST VOTE]
+  4. ✓ Vote recorded
+
+Step 5: ANONYMIZATION (Admin)
+──────────────────────────────
+  1. Click: 🔀 MixNet
+  2. Adjust: Layers (optional)
+  3. Click: [RUN MIXNET]
+  4. ✓ Ballots anonymized
+
+Step 6: RESULTS
+───────────────
+  1. Click: 📊 Tally
+  2. ✓ See: Vote counts
+
+Step 7: AUDIT (Admin)
+─────────────────────
+  1. Click: 📜 Logs
+  2. ✓ View: All events
+
+═══════════════════════════════════════════════════════════════════════════════
+
+KEY FEATURES
+
+✅ VOTER SELF-REGISTRATION
+   • Anyone can create account before login
+   • No admin needed initially
+   • Auto-generated Voter ID
+   • Can provide name and email
+
+✅ ADMIN LOGIN (Separate)
+   • Special admin credentials
+   • Access to all admin functions
+   • Issue tokens, run mixnet, manage users
+
+✅ TWO PATHS TO VOTING
+
+   PATH 1 (Self-service):
+   ├─ Voter self-registers → Gets ID
+   ├─ Admin logs in separately
+   ├─ Admin issues token to voter
+   └─ Voter can now vote (if voter access added later)
+
+   PATH 2 (Admin-managed):
+   ├─ Admin logs in
+   ├─ Admin manually registers voters
+   ├─ Admin issues tokens
+   └─ Voters vote via system
+
+✅ COMPLETE WORKFLOW
+   Pre-login:      Home → Register → Admin Login
+   Post-login:     Register → Token → Vote → MixNet → Tally → Logs
+
+═══════════════════════════════════════════════════════════════════════════════
+
+CODE STRUCTURE
+
+def page_register_voter():
+    """Self-registration (pre-login)"""
+    - Input: Name, Email
+    - Output: Voter ID (auto-generated)
+    - Uses: voter_client.register()
+    - Returns: Success message with ID
+
+Navigation Menu:
+    if not authenticated:
+        pages = {
+            "🏠 Home": page_home,
+            "📝 Register": page_register_voter,        ← NEW
+            "🔐 Admin Login": page_admin_login,
+        }
+    else:
+        pages = {
+            "🏠 Home": page_home,
+            "✍️ Register Voter": page_voter_registration,
+            "🔑 Request Token": page_request_token,
+            "🗳️ Cast Vote": page_cast_vote,
+            "🔀 MixNet": page_mixnet,
+            "📊 Tally": page_tally,
+            "📜 Logs": page_logs,
+            "🚪 Logout": page_logout,
+        }
+
+═══════════════════════════════════════════════════════════════════════════════
+
+IMPROVEMENTS OVER PREVIOUS VERSION
+
+Before:
+  • Only Home and Login before authentication
+  • No self-service registration
+  • Voters had to wait for admin
+
+After:
+  • Home, Register, and Login before authentication
+  • Voters can self-register immediately
+  • Get Voter ID without admin help
+  • Admin logs in separately to manage system
+
+═══════════════════════════════════════════════════════════════════════════════
+
+QUICK START
+
+Terminal 1 (Backend):
+  $ bash /workspace/run_backend.sh
+
+Terminal 2 (Frontend):
+  $ bash /workspace/run_frontend.sh
+
+Browser:
+  http://localhost:8501
+
+Flow:
+  1. Click: 📝 Register
+  2. Enter: Name, Email
+  3. Get: Voter ID
+  4. Click: 🔐 Admin Login
+  5. Enter: admin/adminpass
+  6. Manage system!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STATUS: ✅ COMPLETE
+
+✓ New register page added
+✓ Pre-login menu updated (3 pages)
+✓ Voter self-service registration
+✓ Auto-generated voter IDs
+✓ Admin login separate
+✓ All features working
+✓ Syntax valid
+✓ Ready to use
+
+═══════════════════════════════════════════════════════════════════════════════

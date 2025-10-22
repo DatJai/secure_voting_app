@@ -1,0 +1,548 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║          SECURE VOTING SYSTEM - STAGE 2 VISUAL ARCHITECTURE               ║
+║                                                                            ║
+║                    Role-Based Access Control Flow                         ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+═════════════════════════════════════════════════════════════════════════════
+AUTHENTICATION FLOW
+═════════════════════════════════════════════════════════════════════════════
+
+                            ┌─────────────────┐
+                            │  Open Browser   │
+                            │   No Session    │
+                            └────────┬────────┘
+                                     │
+                                     ▼
+                      ┌──────────────────────────┐
+                      │   PRE-LOGIN STATE        │
+                      │ authenticated = False    │
+                      │ user_type = None         │
+                      └────────────┬─────────────┘
+                                   │
+                   ┌───────────────┼────────────────┐
+                   │               │                │
+                   ▼               ▼                ▼
+          ┌────────────────┐ ┌──────────┐  ┌────────────────┐
+          │  🏠 Home       │ │📝 Register│  │🔐 System Access│
+          │ (Public Info)  │ │(Register) │  │  (Login)       │
+          └────────────────┘ └──────────┘  └────────┬────────┘
+                                                    │
+                            ┌───────────────────────┼───────────────────────┐
+                            │                       │                       │
+                            ▼                       ▼                       ▼
+                ┌─────────────────────┐  ┌──────────────────┐ ┌─────────────────────┐
+                │  ADMIN LOGIN TAB     │  │ VOTER LOGIN TAB  │ │ VOTER SELF-REGISTER │
+                │ Username + Password  │  │ Voter ID + Name  │ │ Name + Email        │
+                │                      │  │                  │ │ → Auto-gen ID       │
+                │ admin / adminpass    │  │ e.g. VOTER-001   │ │ (Gets VOTER-002)    │
+                │                      │  │                  │ │                     │
+                └──────────┬───────────┘  └────────┬─────────┘ └─────────────────────┘
+                           │                       │
+                           ▼                       ▼
+            ┌──────────────────────────┐  ┌────────────────────────┐
+            │  ✓ ADMIN LOGIN SUCCESS   │  │ ✓ VOTER LOGIN SUCCESS  │
+            │  authenticated = True    │  │ authenticated = True   │
+            │  user_type = "admin"     │  │ user_type = "voter"    │
+            │  admin_token = JWT       │  │ voter_id = VOTER-001   │
+            │  voter_id = None         │  │ voter_name = John Doe  │
+            │  voter_name = None       │  │ admin_token = None     │
+            └──────────────┬───────────┘  └────────┬───────────────┘
+                           │                       │
+                           ▼                       ▼
+          ┌────────────────────────────┐  ┌─────────────────────────┐
+          │   ADMIN POST-LOGIN MENU    │  │  VOTER POST-LOGIN MENU  │
+          │         (8 pages)          │  │      (4 pages)          │
+          └────────────────────────────┘  └─────────────────────────┘
+
+
+═════════════════════════════════════════════════════════════════════════════
+SIDEBAR NAVIGATION STRUCTURE
+═════════════════════════════════════════════════════════════════════════════
+
+SIDEBAR COLUMN (Left)
+┌────────────────────────────────┐
+│   🗳️  Secure Voting System    │
+├────────────────────────────────┤
+│   Navigate: [Dropdown ▼]       │ ◄─ Different menus based on auth state
+│                                │
+│   ┌─ PRE-LOGIN MENU (3 pages)  │
+│   │  ├─ 🏠 Home                │
+│   │  ├─ 📝 Register            │
+│   │  └─ 🔐 System Access       │
+│   │                            │
+│   ├─ ADMIN MENU (8 pages)      │
+│   │  ├─ 🏠 Home                │
+│   │  ├─ ✍️ Register Voter     │
+│   │  ├─ 🔑 Request Token       │
+│   │  ├─ 🗳️ Cast Vote          │
+│   │  ├─ 🔀 MixNet              │
+│   │  ├─ 📊 Tally               │
+│   │  ├─ 📜 Logs                │
+│   │  └─ 🚪 Logout              │
+│   │                            │
+│   └─ VOTER MENU (4 pages)      │
+│      ├─ 🏠 Home                │
+│      ├─ 🔑 Request Token       │
+│      ├─ 🗳️ Cast Vote          │
+│      └─ 🚪 Logout              │
+│                                │
+├────────────────────────────────┤
+│   ─────────────────────────    │
+│   ℹ️ Not logged in              │ ◄─ PRE-LOGIN
+│   Menu: Pre-Login              │
+│                                │
+│   OR                           │
+│                                │
+│   ✓ Admin Access               │ ◄─ ADMIN
+│   Full system control enabled  │
+│   Menu: Admin                  │
+│                                │
+│   OR                           │
+│                                │
+│   ✓ John Doe                   │ ◄─ VOTER
+│   Voter ID: VOTER-001          │
+│   Menu: Voter                  │
+└────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════
+ADMIN PAGE HIERARCHY
+═════════════════════════════════════════════════════════════════════════════
+
+                       ┌──────────────────┐
+                       │  ADMIN DASHBOARD │
+                       │   (8 pages)      │
+                       └────────┬─────────┘
+                                │
+            ┌───────────────────┼───────────────────┐
+            │                   │                   │
+            ▼                   ▼                   ▼
+   ┌───────────────┐    ┌───────────────┐   ┌───────────────┐
+   │  Shared Pages │    │ Admin-Only    │   │  Voter Pages  │
+   │   (Everyone)  │    │   Pages       │   │ (can access)  │
+   └───────────────┘    └───────────────┘   └───────────────┘
+         │                     │                   │
+    ┌────┴────┐        ┌──────┼──────┐        ┌────┴────┐
+    │          │        │      │      │        │         │
+    ▼          ▼        ▼      ▼      ▼        ▼         ▼
+ 🏠 Home  🚪 Logout  ✍️ Reg.  🔀 Mix  📊 Tal  🔑 Token 🗳️ Vote
+        
+   PUBLIC      BOTH     ADMIN-ONLY     VOTER-ONLY
+   (info)     (auth)     (system)       (demo)
+   ────────────────────────────────────────────────────
+   No check   Check auth Check: type Check: Works for
+   needed     + type     == "admin"    demo/testing
+                         (ACCESS OK)
+
+═════════════════════════════════════════════════════════════════════════════
+VOTER PAGE HIERARCHY
+═════════════════════════════════════════════════════════════════════════════
+
+                       ┌──────────────────┐
+                       │  VOTER DASHBOARD │
+                       │   (4 pages)      │
+                       └────────┬─────────┘
+                                │
+            ┌───────────────────┼───────────────────┐
+            │                   │                   │
+            ▼                   ▼                   ▼
+   ┌───────────────┐    ┌───────────────┐
+   │  Shared Pages │    │  Voter-Only   │
+   │   (Everyone)  │    │   Pages       │
+   └───────────────┘    └───────────────┘
+         │                     │
+    ┌────┴────┐        ┌──────┴──────┐
+    │          │        │             │
+    ▼          ▼        ▼             ▼
+ 🏠 Home  🚪 Logout  🔑 Token   🗳️ Vote
+        
+   PUBLIC      BOTH     VOTER-ONLY (REQUIRED)
+   (info)     (auth)    Check: type == "voter"
+   ────────────────     (ACCESS DENIED if not voter)
+   No check   Check auth+ 
+   needed     type+voter_id
+              & voter_name
+              from session
+
+═════════════════════════════════════════════════════════════════════════════
+SECURITY CHECK FLOW (Page-Level)
+═════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────┐
+│  USER CLICKS PAGE IN SIDEBAR                                │
+└───────────────────────┬──────────────────────────────────────┘
+                        │
+                        ▼
+        ┌───────────────────────────────────┐
+        │  PAGE FUNCTION LOADS              │
+        │  (e.g., page_register_voter())    │
+        └───────────────┬───────────────────┘
+                        │
+                        ▼
+        ┌───────────────────────────────────┐
+        │  SECURITY CHECK EXECUTES          │
+        │  (First thing in function)        │
+        └───────────┬───────────────────────┘
+                    │
+        ┌───────────┴────────────┐
+        │                        │
+        ▼                        ▼
+   CHECK PASSED            CHECK FAILED
+   (User authorized)       (User not authorized)
+        │                        │
+        ▼                        ▼
+   ✅ Display Page          ⚠️ Warning Message
+   ✅ Load Data             ✅ Display: "{Role} login
+   ✅ Show Content             required. Please log in
+   ✅ Enable Forms             as a {Role} first."
+   ✅ Process Input         ✅ Return (exit page)
+   ✅ Handle Actions        ⚠️ Page content NOT shown
+
+Examples:
+
+Admin-Only Page (Register Voter):
+─────────────────────────────────
+if not authenticated or user_type != "admin":
+    ⚠️ Show "Admin login required"
+    return  # Exit - don't show page
+✅ Show admin page content
+
+Voter-Only Page (Cast Vote):
+────────────────────────────
+if not authenticated or user_type != "voter":
+    ⚠️ Show "Voter login required"
+    return  # Exit - don't show page
+✅ Pre-fill voter ID & name from session (cannot edit)
+✅ Show voting interface
+✅ Allow candidate selection
+✅ Submit vote
+
+═════════════════════════════════════════════════════════════════════════════
+SESSION STATE LIFECYCLE
+═════════════════════════════════════════════════════════════════════════════
+
+                         BROWSER SESSION
+    ┌──────────────────────────────────────────────────┐
+    │  Session State (In Memory)                       │
+    │  (Stored in Streamlit session_state)            │
+    └──────────────────────────────────────────────────┘
+                                                  │
+                                                  │ INITIALIZE
+                                                  ▼
+    ┌──────────────────────────────────────────────────┐
+    │ Initial State (Pre-Login)                        │
+    │ ├─ authenticated = False                        │
+    │ ├─ user_type = None                             │
+    │ ├─ admin_token = None                           │
+    │ ├─ voter_id = None                              │
+    │ └─ voter_name = None                            │
+    └──────────────────────┬───────────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+        ADMIN LOGIN              VOTER LOGIN
+              │                         │
+              ▼                         ▼
+    ┌──────────────────┐       ┌──────────────────┐
+    │ Admin State      │       │ Voter State      │
+    │ authenticated=T  │       │ authenticated=T  │
+    │ user_type="admin"│       │ user_type="voter"│
+    │ admin_token=JWT  │       │ voter_id=VOTER-1 │
+    │ voter_id=None    │       │ voter_name=John  │
+    │ voter_name=None  │       │ admin_token=None │
+    └────────┬─────────┘       └────────┬─────────┘
+             │                         │
+             │        NAVIGATE         │
+             │     (Page to page)      │
+             │                         │
+             │  Session Persists       │
+             │  (User stays logged in) │
+             │                         │
+             └────────────┬────────────┘
+                          │
+                    CLICK LOGOUT
+                          │
+                          ▼
+    ┌──────────────────────────────────────────────────┐
+    │ Clear Everything                                │
+    │ ├─ authenticated = False                        │
+    │ ├─ user_type = None                             │
+    │ ├─ admin_token = None                           │
+    │ ├─ voter_id = None                              │
+    │ └─ voter_name = None                            │
+    └────────────────┬─────────────────────────────────┘
+                     │
+                     ▼
+    ┌──────────────────────────────────────────────────┐
+    │ Back to Pre-Login Menu                          │
+    │ (3 pages: Home, Register, System Access)       │
+    └──────────────────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════
+PAGE ACCESS MATRIX (Complete)
+═════════════════════════════════════════════════════════════════════════════
+
+                  PRE-LOGIN  ADMIN  VOTER  SECURITY
+                  ─────────  ─────  ─────  ────────────────────
+🏠 Home              ✓        ✓       ✓     None
+📝 Register          ✓        ✗       ✗     None (public)
+🔐 System Access     ✓        ✗       ✗     None (public)
+
+✍️ Register Voter    ✗        ✓       ✗     ✓ user_type=="admin"
+🔑 Request Token     ✗        ✓       ✓     ✓ user_type=="voter"
+🗳️ Cast Vote        ✗        ✓       ✓     ✓ user_type=="voter"
+🔀 MixNet            ✗        ✓       ✗     ✓ user_type=="admin"
+📊 Tally             ✗        ✓       ✗     ✓ user_type=="admin"
+📜 Logs              ✗        ✓       ✗     ✓ user_type=="admin"
+
+🚪 Logout            ✗        ✓       ✓     Requires auth
+
+LEGEND:
+✓ = Can access
+✗ = Cannot access
+✓ Check = Security check enforced
+None = No check needed (public)
+
+═════════════════════════════════════════════════════════════════════════════
+DATA FLOW: VOTER REGISTRATION TO VOTING
+═════════════════════════════════════════════════════════════════════════════
+
+STEP 1: VOTER SELF-REGISTRATION (Pre-Login)
+┌─────────────────────────────────┐
+│ Voter clicks: 📝 Register       │
+│ Enters: Name, Email             │
+│ Form submits →                  │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+        ┌─────────────────────┐
+        │ Backend Processing  │
+        │ ├─ Generate ID      │
+        │ │  Format: VOTER-00X│
+        │ └─ Store in DB      │
+        └────────┬────────────┘
+                 │
+                 ▼
+        ┌────────────────────────┐
+        │ Response to Frontend   │
+        │ ├─ voter_id: VOTER-001 │
+        │ ├─ name: John Doe       │
+        │ └─ email: john@...      │
+        └────────┬───────────────┘
+                 │
+                 ▼
+        ┌───────────────────────┐
+        │ Frontend Shows        │
+        │ "Your ID: VOTER-001"  │
+        │ "You can now login"   │
+        └───────────────────────┘
+
+STEP 2: VOTER LOGS IN
+┌──────────────────────────────────┐
+│ Voter clicks: 🔐 System Access   │
+│ Tab: 🗳️ Voter Login             │
+│ Enters: VOTER-001 / John Doe     │
+│ Submit →                         │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+        ┌────────────────────────┐
+        │ Frontend Validates     │
+        │ Checks voter exists in │
+        │ voter_client.list()    │
+        │ Result: VOTER-001 found│
+        └────────┬───────────────┘
+                 │
+                 ▼
+        ┌────────────────────────┐
+        │ Session Updated        │
+        │ authenticated = True   │
+        │ user_type = "voter"    │
+        │ voter_id = VOTER-001   │
+        │ voter_name = John Doe  │
+        └────────┬───────────────┘
+                 │
+                 ▼
+        ┌────────────────────────┐
+        │ Navigation Updated     │
+        │ Shows Voter Menu (4 p) │
+        │ ├─ Home                │
+        │ ├─ Request Token       │
+        │ ├─ Cast Vote           │
+        │ └─ Logout              │
+        └────────────────────────┘
+
+STEP 3: VOTER REQUESTS TOKEN
+┌────────────────────────────────┐
+│ Voter clicks: 🔑 Request Token │
+│ Sees: Voter name + ID (fixed)  │
+│ Clicks: Request Blind Token    │
+│ Submit →                       │
+└────────────────┬───────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Frontend Gets Public Key │
+        │ From: token_client       │
+        │ Result: Public key OK    │
+        └────────┬─────────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Frontend Issues Token    │
+        │ Calls: token_client.     │
+        │   issue_token(           │
+        │   voter_id=VOTER-001,    │
+        │   blinded=...            │
+        │   )                      │
+        └────────┬─────────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Backend Returns          │
+        │ ├─ token: <JWT>          │
+        │ └─ issued_at: timestamp  │
+        └────────┬─────────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Frontend Shows           │
+        │ "✓ Token issued!"        │
+        │ Session stores token     │
+        └──────────────────────────┘
+
+STEP 4: VOTER CASTS VOTE
+┌────────────────────────────────┐
+│ Voter clicks: 🗳️ Cast Vote     │
+│ Sees: Voter name + ID (fixed)  │
+│ Selects: Candidate A           │
+│ Clicks: Cast Vote              │
+│ Submit →                       │
+└────────────────┬───────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Frontend Gets Token      │
+        │ Calls: token_client.     │
+        │   tokens_by_voter(       │
+        │   voter_id=VOTER-001     │
+        │   )                      │
+        │ Result: Token retrieved  │
+        └────────┬─────────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Frontend Casts Vote      │
+        │ Calls: ballot_client.    │
+        │   cast(                  │
+        │   voter_id=VOTER-001,    │
+        │   token=<JWT>,           │
+        │   data={candidate:...}   │
+        │   )                      │
+        └────────┬─────────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Backend Records Vote     │
+        │ ├─ Links to voter        │
+        │ ├─ Records candidate     │
+        │ └─ Generates receipt ID  │
+        └────────┬─────────────────┘
+                 │
+                 ▼
+        ┌──────────────────────────┐
+        │ Frontend Shows Result    │
+        │ "✓ Vote cast!"           │
+        │ "Candidate: A"           │
+        │ "Receipt ID: ..."        │
+        └──────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════
+ADMIN WORKFLOW: REGISTRATION TO TALLY
+═════════════════════════════════════════════════════════════════════════════
+
+1. ADMIN LOGS IN
+   admin/adminpass → Session: admin token set, user_type="admin"
+
+2. ADMIN REGISTERS VOTERS
+   ✍️ Register Voter → Register 3 voters
+   Names: Alice, Bob, Carol → System generates: VOTER-001, VOTER-002, VOTER-003
+
+3. ADMIN ISSUES TOKENS
+   🔑 Request Token → Select VOTER-001 → Issue Token
+
+4. ADMIN RUNS VOTING (Demo)
+   🗳️ Cast Vote → Select VOTER-002 → Vote for Candidate A
+
+5. ADMIN RUNS MIXNET
+   🔀 MixNet → Set layers: 5 → Run MixNet
+   ⚠️ Ballots anonymized and shuffled (irreversible)
+
+6. ADMIN VIEWS RESULTS
+   📊 Tally → See votes by candidate
+   Candidate A: 1 vote (but link to voter erased by MixNet)
+
+7. ADMIN CHECKS AUDIT TRAIL
+   📜 Logs → See all system events
+
+8. ADMIN LOGS OUT
+   🚪 Logout → Session cleared
+
+═════════════════════════════════════════════════════════════════════════════
+COMPLETE VOTER WORKFLOW
+═════════════════════════════════════════════════════════════════════════════
+
+START                    REGISTER              LOGIN                VOTE
+────────────────────────────────────────────────────────────────────────────
+
+Open browser
+│
+├─ See pre-login menu (Home, Register, System Access)
+│
+└─> Click 📝 Register
+    └─> Enter: Jane Doe, jane@example.com
+    └─> Backend generates: VOTER-002
+    └─> Shows: "Your ID: VOTER-002"
+    └─> Note: Now ready to login
+
+Login Phase
+│
+└─> Click 🔐 System Access
+    └─> Tab: 🗳️ Voter Login
+    └─> Enter: VOTER-002 / Jane Doe
+    └─> Submit
+    └─> Frontend verifies voter exists
+    └─> Session: authenticated=True, user_type="voter", voter_id=VOTER-002
+    └─> Menu shows: 4 voter pages
+
+Voting Phase
+│
+├─> Click 🔑 Request Token
+│   └─> Shows: Jane Doe (ID: VOTER-002) [cannot edit]
+│   └─> Click: Request Blind Token
+│   └─> Backend issues token
+│   └─> Shows: "✓ Token issued!"
+│
+├─> Click 🗳️ Cast Vote
+│   └─> Shows: Jane Doe (ID: VOTER-002) [cannot edit]
+│   └─> Select: Candidate B
+│   └─> Click: Cast Vote
+│   └─> Backend records vote
+│   └─> Shows: "✓ Vote cast successfully!"
+│
+└─> Click 🚪 Logout
+    └─> Session cleared
+    └─> Return to pre-login menu
+    └─> Shows: "ℹ️ Not logged in"
+
+═════════════════════════════════════════════════════════════════════════════
+
+That's the complete Stage 2 architecture! 🎉
+
+Version: 2.0 (Stage 2 Complete)
+Status: ✅ PRODUCTION READY
+Last Updated: October 22, 2025
+
+═════════════════════════════════════════════════════════════════════════════

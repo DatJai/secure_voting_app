@@ -1,0 +1,12 @@
+streamlit
+psycopg2-binary
+cryptography
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+PyJWT
+bcrypt
+pytest
+httpx
+requests

@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS voters (
     voter_id TEXT PRIMARY KEY,
     name TEXT,
+    email TEXT,
     has_token BOOLEAN DEFAULT FALSE,
     has_voted BOOLEAN DEFAULT FALSE
 );
@@ -90,3 +91,16 @@ GRANT CONNECT ON DATABASE voting_db TO logger_user;
 GRANT USAGE ON SCHEMA public TO logger_user;
 GRANT INSERT ON logs TO logger_user;
 GRANT USAGE, SELECT ON SEQUENCE logs_id_seq TO logger_user;
+
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    password_hash TEXT NOT NULL,
+    scopes TEXT DEFAULT 'admin'
+);
+
+-- Revoked tokens table (store jti values)
+CREATE TABLE IF NOT EXISTS revoked_tokens (
+    jti TEXT PRIMARY KEY,
+    revoked_at TIMESTAMP DEFAULT NOW()
+);
