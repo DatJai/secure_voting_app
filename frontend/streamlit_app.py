@@ -1,4 +1,15 @@
 import streamlit as st
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables early
+env_path = Path(__file__).parent / ".env.frontend"
+load_dotenv(dotenv_path=env_path)
+
+# Fallback to .env if .env.frontend not found
+if not os.getenv("BACKEND_URL"):
+    load_dotenv()
 
 # Configure page
 st.set_page_config(

@@ -1,5 +1,16 @@
 from fastapi import FastAPI
 from api.routes import voters, tokens, ballots, mixnet, logs, auth, users
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables early
+env_path = Path(__file__).parent / ".env.backend"
+load_dotenv(dotenv_path=env_path)
+
+# Fallback to .env if .env.backend not found
+if not os.getenv("DATABASE_URL"):
+	load_dotenv()
 
 
 def create_app() -> FastAPI:

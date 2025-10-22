@@ -1,8 +1,15 @@
 import os
 import requests
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Load environment variables from .env.frontend file
+env_path = Path(__file__).parent.parent / ".env.frontend"
+load_dotenv(dotenv_path=env_path)
+
+# Fallback: also try loading from .env if .env.frontend not found
+if not os.getenv("BACKEND_URL"):
+    load_dotenv()
 
 BASE = os.getenv("BACKEND_URL", "http://localhost:8000").rstrip("/")
 
